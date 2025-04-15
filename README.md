@@ -8,7 +8,7 @@ From terminal:
 
     1) psql postgres
     
-    2) \c finance_dashboard
+    2) \c *database name*
     
 
 Purpose	Command Example
