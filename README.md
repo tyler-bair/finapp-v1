@@ -5,6 +5,15 @@ DOWNLOAD DEPENDENCIES: `./mvnw install`
 
 You will have to install postgres and set it up as well.
 
+To set spring-boot environoment variables use:
+    MacOs/Linux:
+        export SPRING_DATASOURCE_USERNAME=dashboard_user
+        export SPRING_DATASOURCE_PASSWORD=pass
+
+    Windows:
+        set SPRING_DATASOURCE_USERNAME=dashboard_user
+        set SPRING_DATASOURCE_PASSWORD=pass
+
 To Access DB:
 From terminal:
 
