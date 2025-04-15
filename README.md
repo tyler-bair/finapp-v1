@@ -3,6 +3,8 @@ RUN APP WITH: `./mvnw spring-boot:run`
 
 DOWNLOAD DEPENDENCIES: `./mvnw install`
 
+You will have to install postgres and set it up as well.
+
 To Access DB:
 From terminal:
 
