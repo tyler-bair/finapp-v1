@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/portfolios")
@@ -26,6 +27,11 @@ public class PortfolioController {
 
     @PostMapping
     public Portfolio create(@RequestBody Portfolio portfolio) {
+        Optional<Portfolio> existingPortfolio = repo.findByName(portfolio.getName());
+
+        if(existingPortfolio.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Portfolio with this name already exists.");
+        }
         return repo.save(portfolio);
     }
 
