@@ -3,12 +3,14 @@ RUN APP WITH: `./mvnw spring-boot:run`
 
 DOWNLOAD DEPENDENCIES: `./mvnw install`
 
+You will have to install postgres and set it up as well.
+
 To Access DB:
 From terminal:
 
     1) psql postgres
     
-    2) \c finance_dashboard
+    2) \c *database name*
     
 
 Purpose	Command Example
