@@ -13,7 +13,7 @@ export const getTickerSymbols = async (portfolioId: number): Promise<TickerSymbo
     }
 }
 
-export const addTickerSymbol = async (symbol: string, portfolioId: number): Promise<TickerSymbolT> => {
+export const addTickerSymbol = async (symbol: string, portfolioId: number): Promise<TickerSymbolT | 409> => {
     try {
         const newTicker = {
             symbol: symbol.toUpperCase(),
@@ -21,8 +21,12 @@ export const addTickerSymbol = async (symbol: string, portfolioId: number): Prom
         };
         const response = await axios.post<TickerSymbolT>(BASE_URL, newTicker);
         return response.data;
-    } catch (e) {
-        console.log("Error adding ticker symbol: ", e);
+    } catch (e: unknown) {
+        if (axios.isAxiosError(e)) {
+            if (e.response?.status === 409) {
+                return 409;
+            }
+        }        
         throw e;
     }
 }

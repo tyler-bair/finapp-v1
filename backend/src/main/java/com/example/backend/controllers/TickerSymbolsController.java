@@ -36,6 +36,12 @@ public class TickerSymbolsController {
         Portfolio portfolio = portfolioRepository.findById(request.portfolioId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Portfolio not found"));
 
+        // Checks if ticker already exists
+        Boolean exists = tickerSymbolsRepository.existsBySymbolAndPortfolioId(request.symbol, request.portfolioId);
+        if (Boolean.TRUE.equals(exists)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ticker '" + request.symbol + "' already exists in portfolio '" + portfolio.getName() + "'");
+        }
+
         TickerSymbols tickerSymbol = new TickerSymbols();
         tickerSymbol.setSymbol(request.symbol);
         tickerSymbol.setPortfolio(portfolio);

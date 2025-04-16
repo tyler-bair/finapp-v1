@@ -30,7 +30,7 @@ public class PortfolioController {
         Optional<Portfolio> existingPortfolio = repo.findByName(portfolio.getName());
 
         if(existingPortfolio.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Portfolio with this name already exists.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Portfolio with name '" + portfolio.getName() + "' already exists.");
         }
         return repo.save(portfolio);
     }
