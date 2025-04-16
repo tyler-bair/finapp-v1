@@ -13,13 +13,17 @@ export const getPortfolios = async (): Promise<PortfolioT[]> => {
     }
 }
 
-export const addPortfolio = async (name: string): Promise<PortfolioT> => {
+export const addPortfolio = async (name: string): Promise<PortfolioT | 409> => {
     try {
         const newPortfolio = { name };
         const response = await axios.post<PortfolioT>(BASE_URL, newPortfolio);
         return response.data;
-    } catch (e) {
-        console.log("Error adding portfolio: ", e);
+    } catch (e: unknown) {
+        if (axios.isAxiosError(e)) {
+            if (e.response?.status === 409) {
+                return 409;
+            }
+        }
         throw e;
     }
 }

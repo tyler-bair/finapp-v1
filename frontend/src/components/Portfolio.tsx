@@ -11,7 +11,9 @@ import {
     Container,
     Paper,
     Stack,
-    Box
+    Box,
+    Snackbar,
+    Alert
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
@@ -26,6 +28,8 @@ const Portfolio: React.FC = () => {
     const [newTickerSymbol, setNewTickerSymbol] = useState<string>('');
     const [selectedPortfolioId, setSelectedPortfolioId] = useState<number | null>(null);
     const [tickerSymbols, setTickerSymbols] = useState<TickerSymbolT[]>([]);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
 
     // Function to fetch ticker symbols for a specific portfolio
     const fetchTickerSymbols = async (portfolioId: number): Promise<void> => {
@@ -42,12 +46,12 @@ const Portfolio: React.FC = () => {
     const fetchPortfolios = async (): Promise<void> => {
         try {
             const data = await getPortfolios();
-            setPortfolios(data);  
+            setPortfolios(data);
         } catch (e) {
             console.log("Error fetching portfolios: ", e);
             throw e;
         }
-    }
+    };
 
     // Initial load of portfolios
     useEffect(() => {
@@ -64,11 +68,17 @@ const Portfolio: React.FC = () => {
     const handleAddPortfolio = async (): Promise<void> => {
         if (!newPortfolioName.trim()) return;
         try {
-            await addPortfolio(newPortfolioName);
-            fetchPortfolios();
-            setNewPortfolioName('');
+            const portfolio = await addPortfolio(newPortfolioName);
+            if (portfolio === 409) {
+                setErrorMessage("Portfolio already exists.");
+                setOpenSnackbar(true); // Show custom error popup
+            } else {
+                fetchPortfolios();
+                setNewPortfolioName('');
+            }
         } catch (e) {
-            console.log("Error adding portfolio: ", e);
+            setErrorMessage("An error occurred while adding the portfolio.");
+            setOpenSnackbar(true); // Show custom error popup
             throw e;
         }
     };
@@ -82,7 +92,9 @@ const Portfolio: React.FC = () => {
                 setTickerSymbols([]);
             }
         } catch (e) {
-            console.log('Error deleting portfolio:', e)   
+            console.log('Error deleting portfolio:', e);
+            setErrorMessage("Error deleting portfolio.");
+            setOpenSnackbar(true); // Show custom error popup
             throw e;
         }
     };
@@ -90,11 +102,16 @@ const Portfolio: React.FC = () => {
     const handleAddTickerSymbol = async (): Promise<void> => {
         if (!selectedPortfolioId || !newTickerSymbol.trim()) return;
         try {
-            await addTickerSymbol(newTickerSymbol, selectedPortfolioId);
+            const ticker = await addTickerSymbol(newTickerSymbol, selectedPortfolioId);
+            if (ticker === 409) {
+                setErrorMessage("Ticker already exists in selected portfolio.");
+                setOpenSnackbar(true); // Show custom error popup
+            }
             setNewTickerSymbol('');
             fetchTickerSymbols(selectedPortfolioId);
         } catch (e) {
-            console.log("Error adding ticker symbol: ", e);
+            setErrorMessage("Error adding ticker symbol.");
+            setOpenSnackbar(true); // Show custom error popup
             throw e;
         }
     };
@@ -107,6 +124,8 @@ const Portfolio: React.FC = () => {
             }
         } catch (e) {
             console.log('Error deleting ticker symbol:', e);
+            setErrorMessage("Error deleting ticker symbol.");
+            setOpenSnackbar(true); // Show custom error popup
             throw e;
         }
     };
@@ -115,20 +134,21 @@ const Portfolio: React.FC = () => {
         setSelectedPortfolioId(null);
         setTickerSymbols([]);
     };
-
+    const handleCloseSnackbar = () => {
+        setOpenSnackbar(false);
+    };
     const selectedPortfolio = portfolios.find(p => p.id === selectedPortfolioId);
     const navigate = useNavigate();
-
     return (
         <Container maxWidth="md" sx={{ mt: 2 }}>
             <Box display="flex" justifyContent="flex-start" sx={{ mb: 2 }}>
                 <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                onClick={() => navigate('/')}
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    onClick={() => navigate('/')}
                 >
-                Back
+                    Back
                 </Button>
             </Box>
             <Paper elevation={3} sx={{ p: 4, mb: 4 }}>
@@ -157,7 +177,6 @@ const Portfolio: React.FC = () => {
                         </Button>
                     </Stack>
                 </Box>
-
                 <List sx={{ mt: 2 }}>
                     {portfolios.map((portfolio) => (
                         <React.Fragment key={portfolio.id}>
@@ -220,31 +239,29 @@ const Portfolio: React.FC = () => {
                             </Button>
                         </Stack>
                     </Box>
-                    
-                    {/* Fixed height container with header */}
-                    <Box 
-                        sx={{ 
-                            mt: 2, 
-                            border: '1px solid #e0e0e0', 
+                    {/* Scrollable container with fixed height */}
+                    <Box
+                        sx={{
+                            mt: 2,
+                            border: '1px solid #e0e0e0',
                             borderRadius: 1,
                             display: 'flex',
                             flexDirection: 'column'
                         }}
                     >
                         {/* Header - stays fixed */}
-                        <Box sx={{ 
-                            p: 2, 
-                            bgcolor: '#f5f5f5', 
+                        <Box sx={{
+                            p: 2,
+                            bgcolor: '#f5f5f5',
                             borderBottom: '1px solid #e0e0e0',
                         }}>
                             <Typography variant="subtitle1">
                                 Ticker Symbols ({tickerSymbols.length})
                             </Typography>
                         </Box>
-                        
                         {/* Scrollable container with fixed height */}
-                        <Box 
-                            sx={{ 
+                        <Box
+                            sx={{
                                 maxHeight: '250px',
                                 overflow: 'auto',
                                 '&::-webkit-scrollbar': {
@@ -261,7 +278,7 @@ const Portfolio: React.FC = () => {
                         >
                             {tickerSymbols.length > 0 ? (
                                 tickerSymbols.map((ticker) => (
-                                    <Box 
+                                    <Box
                                         key={ticker.id}
                                         sx={{
                                             display: 'flex',
@@ -303,6 +320,16 @@ const Portfolio: React.FC = () => {
                     </Button>
                 </Paper>
             )}
+            {/* Custom error Snackbar */}
+            <Snackbar
+                open={openSnackbar}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+            >
+                <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+                    {errorMessage}
+                </Alert>
+            </Snackbar>
         </Container>
     );
 };

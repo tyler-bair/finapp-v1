@@ -9,5 +9,9 @@ import com.example.backend.TickerSymbols;
 
 @Repository
 public interface TickerSymbolsRepository extends JpaRepository<TickerSymbols, Long> {
+    // Used to fetch tickers for each portfolio
     List<TickerSymbols> findByPortfolioId(Long portfolioId);
+    
+    // Used to check if ticker already exists
+    Boolean existsBySymbolAndPortfolioId(String symbol, Long portfolioId);
 }
