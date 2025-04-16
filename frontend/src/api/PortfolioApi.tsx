@@ -15,7 +15,7 @@ export const getPortfolios = async (): Promise<PortfolioT[]> => {
 
 export const addPortfolio = async (name: string): Promise<PortfolioT | 409> => {
     try {
-        const newPortfolio = { name };
+        const newPortfolio = { name: name.toUpperCase() };
         const response = await axios.post<PortfolioT>(BASE_URL, newPortfolio);
         return response.data;
     } catch (e: unknown) {

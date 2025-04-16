@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router-dom';
 import { PortfolioT, TickerSymbolT } from '../types/GlobalTypes';
 import { addTickerSymbol, deleteTickerSymbol, getTickerSymbols } from '../api/TickerSymbolApi';
 import { addPortfolio, deletePortfolio, getPortfolios } from '../api/PortfolioApi';
+import ErrorSnackbar from './errors/ErrorSnackBar';
 
 const Portfolio: React.FC = () => {
     const [portfolios, setPortfolios] = useState<PortfolioT[]>([]);
@@ -167,6 +168,8 @@ const Portfolio: React.FC = () => {
                             value={newPortfolioName}
                             onChange={(e) => setNewPortfolioName(e.target.value)}
                             fullWidth
+                            error={!!errorMessage && errorMessage.includes("Portfolio")}
+                            helperText={!!errorMessage && errorMessage.includes("Portfolio") ? errorMessage : ''}
                         />
                         <Button
                             type="submit"
@@ -228,6 +231,8 @@ const Portfolio: React.FC = () => {
                                 value={newTickerSymbol}
                                 onChange={(e) => setNewTickerSymbol(e.target.value)}
                                 fullWidth
+                                error={!!errorMessage && errorMessage.includes("Ticker")}
+                                helperText={!!errorMessage && errorMessage.includes("Ticker") ? errorMessage : ''}
                             />
                             <Button
                                 type="submit"
@@ -320,16 +325,11 @@ const Portfolio: React.FC = () => {
                     </Button>
                 </Paper>
             )}
-            {/* Custom error Snackbar */}
-            <Snackbar
+            <ErrorSnackbar
                 open={openSnackbar}
-                autoHideDuration={6000}
+                message={errorMessage}
                 onClose={handleCloseSnackbar}
-            >
-                <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
-                    {errorMessage}
-                </Alert>
-            </Snackbar>
+            />
         </Container>
     );
 };
